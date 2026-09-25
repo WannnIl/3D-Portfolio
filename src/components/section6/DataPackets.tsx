@@ -11,18 +11,37 @@ interface Path {
   progress: number;
 }
 
+import { PROJECTS } from "./projects";
+
 const DataPackets: React.FC = () => {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   
-  // Define ~5 paths with staggered starting progress and slightly different speeds
+  // Define paths dynamically based on project count
   const paths = useMemo<Path[]>(() => {
-    return [
-      { start: new THREE.Vector3(-3, 1, -2), end: new THREE.Vector3(2, -1, 3), speed: 0.3, progress: 0.1 },
-      { start: new THREE.Vector3(4, -2, 1), end: new THREE.Vector3(-2, 2, -1), speed: 0.4, progress: 0.6 },
-      { start: new THREE.Vector3(-1, 3, 2), end: new THREE.Vector3(3, -2, -3), speed: 0.25, progress: 0.3 },
-      { start: new THREE.Vector3(2, 0, -4), end: new THREE.Vector3(-3, 1, 2), speed: 0.35, progress: 0.8 },
-      { start: new THREE.Vector3(-4, -1, 0), end: new THREE.Vector3(1, 2, 4), speed: 0.2, progress: 0.4 },
-    ];
+    const minZ = 15;
+    const maxZ = -(PROJECTS.length * 10 + 20);
+    const numPaths = Math.max(10, PROJECTS.length * 2);
+    
+    const p: Path[] = [];
+    for (let i = 0; i < numPaths; i++) {
+      const start = new THREE.Vector3(
+        (Math.random() - 0.5) * 30,
+        -2 + Math.random() * 6,
+        maxZ + Math.random() * (minZ - maxZ)
+      );
+      const end = new THREE.Vector3(
+        (Math.random() - 0.5) * 30,
+        -2 + Math.random() * 6,
+        maxZ + Math.random() * (minZ - maxZ)
+      );
+      p.push({
+        start,
+        end,
+        speed: 0.1 + Math.random() * 0.3,
+        progress: Math.random(),
+      });
+    }
+    return p;
   }, []);
 
   const dummy = useMemo(() => new THREE.Object3D(), []);
@@ -56,7 +75,7 @@ const DataPackets: React.FC = () => {
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, paths.length]}>
       <sphereGeometry args={[0.04, 6, 6]} />
-      <meshBasicMaterial color="#39FF88" toneMapped={false} />
+      <meshBasicMaterial color="#00CCFF" toneMapped={false} />
     </instancedMesh>
   );
 };

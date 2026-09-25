@@ -8,30 +8,37 @@ interface TerrainProps {
   isMobile?: boolean;
 }
 
+import { PROJECTS } from './projects';
+
 const Terrain: React.FC<TerrainProps> = ({ isMobile = false }) => {
   const lineRef = useRef<THREE.LineSegments>(null);
   const timeRef = useRef(0);
 
-  const segments = isMobile ? 40 : 80;
-  const size = 40;
+  // DRASTICALLY reduced segments to fix stuttering / performance issues
+  // The terrain still looks good as a low-poly wireframe, but with 10x less vertices to calculate per frame.
+  const segmentsX = isMobile ? 15 : 25;
+  const width = 40;
+  
+  // Dynamically calculate length based on the number of projects.
+  const length = Math.max(100, PROJECTS.length * 10 + 60);
+  const segmentsZ = Math.floor((length / width) * segmentsX);
 
-  // Generate the base wireframe geometry once
   const { wireframeGeo, colorBase, colorHighlight } = useMemo(() => {
-    // Use PlaneGeometry for the base grid
-    const planeGeo = new THREE.PlaneGeometry(size, size, segments, segments);
-    
-    // Rotate to face camera horizontally
+    const planeGeo = new THREE.PlaneGeometry(width, length, segmentsX, segmentsZ);
     planeGeo.rotateX(-Math.PI / 2);
     
-    // Convert to WireframeGeometry for LineSegments rendering
+    // Offset the plane so it starts slightly behind the camera (z=20) and goes deep into the negative Z
+    const zOffset = 20 - length / 2;
+    planeGeo.translate(0, 0, zOffset);
+    
     const wireframe = new THREE.WireframeGeometry(planeGeo);
     
     return { 
       wireframeGeo: wireframe,
-      colorBase: new THREE.Color('#073D20'),
-      colorHighlight: new THREE.Color('#00A86B')
+      colorBase: new THREE.Color('#062850'),
+      colorHighlight: new THREE.Color('#007BFF')
     };
-  }, [segments, size]);
+  }, [segmentsX, segmentsZ, width, length]);
 
   // Animate the terrain heights and colors on every frame
   useFrame((_, delta) => {

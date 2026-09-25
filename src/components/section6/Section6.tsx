@@ -8,6 +8,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { s6State } from "./store";
+import { PROJECTS } from "./projects";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -26,21 +27,32 @@ export default function Section6() {
       ScrollTrigger.create({
         trigger: containerRef.current,
         start: "top top",
-        end: "+=6000",
+        end: "+=12000", // Increased scroll distance to accommodate 10 books
         pin: true,
         scrub: 1,
-        refreshPriority: 1,
+        refreshPriority: 2,
         onUpdate: (self) => {
-          s6State.progress = self.progress;
-          setProgress(self.progress);
+          // Compress the 3D animation into the first 85% of the scroll.
+          // The remaining 15% (after mappedProgress hits 1.0) creates a pause 
+          // where the doors stay fully closed before scrolling to the next section.
+          const mappedProgress = Math.min(1, self.progress / 0.85);
+          
+          s6State.progress = mappedProgress;
+          setProgress(mappedProgress);
 
+          // Calculate chapter (1 to PROJECTS.length)
           let newChapter = 0;
-          if (self.progress < 0.15) newChapter = 0;
-          else if (self.progress < 0.35) newChapter = 1;
-          else if (self.progress < 0.55) newChapter = 2;
-          else if (self.progress < 0.75) newChapter = 3;
-          else if (self.progress < 0.95) newChapter = 4;
-          else newChapter = 5;
+          if (mappedProgress <= 0.05) {
+            newChapter = 0; // Door opening phase
+          } else if (mappedProgress >= 0.95) {
+            newChapter = PROJECTS.length + 1; // Door closing phase
+          } else {
+            // Distribute the remaining progress (0.05 to 0.95) evenly across all projects
+            const activeProgress = (mappedProgress - 0.05) / 0.90;
+            newChapter = Math.floor(activeProgress * PROJECTS.length) + 1;
+            if (newChapter > PROJECTS.length) newChapter = PROJECTS.length;
+            if (newChapter < 1) newChapter = 1;
+          }
 
           s6State.chapter = newChapter;
           setChapter(newChapter);
@@ -56,10 +68,10 @@ export default function Section6() {
       className="relative w-full overflow-hidden h-screen z-50"
       style={{
         background: `
-          radial-gradient(circle at 50% 45%, rgba(0, 168, 107, 0.07), transparent 55%),
-          radial-gradient(circle at 20% 80%, rgba(0, 168, 107, 0.03), transparent 40%),
+          radial-gradient(circle at 50% 45%, rgba(0, 123, 255, 0.07), transparent 55%),
+          radial-gradient(circle at 20% 80%, rgba(0, 123, 255, 0.03), transparent 40%),
           radial-gradient(circle at 80% 20%, rgba(0, 200, 120, 0.02), transparent 35%),
-          #020604
+          #020406
         `,
       }}
     >
@@ -70,7 +82,7 @@ export default function Section6() {
           dpr={[1, 1.5]}
           performance={{ min: 0.5 }}
           gl={{ antialias: true, alpha: false }}
-          style={{ background: "#020604" }}
+          style={{ background: "#020406" }}
         >
           <Suspense fallback={null}>
             <Scene />

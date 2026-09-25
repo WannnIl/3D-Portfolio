@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { UnifrakturMaguntia, Space_Grotesk } from "next/font/google";
+import { Cinzel, Space_Grotesk } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import "./globals.css";
 
-const primaryFont = UnifrakturMaguntia({
-  weight: "400",
+const primaryFont = Cinzel({
+  weight: ["400", "700", "900"],
   variable: "--font-primary",
   subsets: ["latin"],
 });
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${primaryFont.variable} ${secondaryFont.variable} antialiased dark`}>
-      <body className="bg-black text-white font-secondary min-h-screen selection:bg-green-600 selection:text-white overflow-x-hidden">
+      <body className="bg-black text-white font-secondary min-h-screen selection:bg-blue-600 selection:text-white overflow-x-hidden">
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

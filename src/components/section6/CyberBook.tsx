@@ -24,9 +24,9 @@ export default function CyberBook({
 }: CyberBookProps) {
   const groupRef = useRef<THREE.Group>(null);
   
-  const themeColor = theme === 'Network' ? '#00A86B' : 
-                     theme === 'Threat' ? '#39FF88' : 
-                     theme === 'Encryption' ? '#00C878' : '#00ff00';
+  const themeColor = theme === 'Network' ? '#007BFF' : 
+                     theme === 'Threat' ? '#00CCFF' : 
+                     theme === 'Encryption' ? '#0099FF' : '#00aaff';
                      
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -58,7 +58,7 @@ export default function CyberBook({
       {/* Cover */}
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[3, 4, 0.1]} />
-        <meshStandardMaterial color="#050A07" roughness={0.7} metalness={0.2} />
+        <meshStandardMaterial color="#03060A" roughness={0.7} metalness={0.2} />
         <Edges scale={1} threshold={15}>
           <lineBasicMaterial color={themeColor} />
         </Edges>
@@ -67,7 +67,7 @@ export default function CyberBook({
       {/* Pages block */}
       <mesh position={[0, 0, -0.25]}>
         <boxGeometry args={[2.8, 3.8, 0.4]} />
-        <meshStandardMaterial color="#0a150d" roughness={0.9} metalness={0.1} />
+        <meshStandardMaterial color="#050A15" roughness={0.9} metalness={0.1} />
       </mesh>
 
       {/* Text on Cover */}

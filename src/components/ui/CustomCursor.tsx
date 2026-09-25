@@ -54,7 +54,7 @@ export default function CustomCursor() {
     <div
       ref={cursorRef}
       className={`fixed top-0 left-0 w-4 h-4 rounded-full pointer-events-none z-[9999] mix-blend-difference transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out ${
-        isHovering ? "scale-[3] bg-green-500" : "scale-100 bg-white"
+        isHovering ? "scale-[3] bg-blue-500" : "scale-100 bg-white"
       }`}
     />
   );

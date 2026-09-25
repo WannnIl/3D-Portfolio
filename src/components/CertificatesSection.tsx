@@ -42,7 +42,7 @@ export default function CertificatesSection() {
       end: `+=${total * 150}%`,
       pin: true,
       scrub: 0,
-      refreshPriority: 2,
+      refreshPriority: 1,
       onUpdate: (self) => {
         const progress = self.progress; 
         const perCert = 1 / total;
@@ -164,7 +164,7 @@ export default function CertificatesSection() {
       {/* 3D Wireframe Cyber Tunnel Background (Optimized for Performance) */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-black flex items-center justify-center [perspective:800px]">
         {/* Core glowing singularity - simplified blur */}
-        <div className="absolute w-[200px] h-[200px] bg-[#00ff00] blur-[100px] opacity-[0.1] rounded-full" style={{ willChange: "transform" }} />
+        <div className="absolute w-[200px] h-[200px] bg-[#00aaff] blur-[100px] opacity-[0.1] rounded-full" style={{ willChange: "transform" }} />
         
         {Array.from({ length: 10 }).map((_, i) => {
           // Tunnel length is 2000px total (10 items * 200px spacing)
@@ -177,7 +177,7 @@ export default function CertificatesSection() {
           return (
             <div 
               key={i}
-              className="absolute w-[60vw] md:w-[35vw] aspect-square border-2 border-[#00ff00]"
+              className="absolute w-[60vw] md:w-[35vw] aspect-square border-2 border-[#00aaff]"
               style={{
                 transform: `translate3d(0, 0, ${zPos}px) rotateZ(${zPos * 0.02}deg)`,
                 opacity: opacity,
@@ -192,7 +192,7 @@ export default function CertificatesSection() {
         <div 
           className="absolute inset-0 opacity-[0.02]"
           style={{
-            backgroundImage: `radial-gradient(circle, #00ff00 1px, transparent 1px)`,
+            backgroundImage: `radial-gradient(circle, #00aaff 1px, transparent 1px)`,
             backgroundSize: '40px 40px',
           }}
         />
@@ -201,7 +201,7 @@ export default function CertificatesSection() {
       {/* Skip Button */}
       <button 
         onClick={skipToNext}
-        className="absolute top-8 md:top-12 right-8 md:right-12 z-40 flex items-center gap-2 text-white/50 hover:text-[#00ff00] hover:drop-shadow-[0_0_8px_#00ff00] transition-all uppercase font-primary tracking-widest text-xs md:text-sm group cursor-pointer"
+        className="absolute top-8 md:top-12 right-8 md:right-12 z-40 flex items-center gap-2 text-white/50 hover:text-[#00aaff] hover:drop-shadow-[0_0_8px_#00aaff] transition-all uppercase font-primary tracking-widest text-xs md:text-sm group cursor-pointer"
       >
         Skip
         <svg 
@@ -237,7 +237,7 @@ export default function CertificatesSection() {
             className="absolute bottom-0 left-0 flex flex-col gap-4"
             style={{ opacity: i === 0 ? 1 : 0 }}
           >
-            <div className="w-12 h-1 bg-[#00ff00] shadow-[0_0_10px_#00ff00]"></div>
+            <div className="w-12 h-1 bg-[#00aaff] shadow-[0_0_10px_#00aaff]"></div>
             <p className="text-white/80 text-sm md:text-base font-secondary leading-relaxed backdrop-blur-md bg-black/30 p-5 rounded-lg border border-white/10 shadow-2xl">
               {cert.desc}
             </p>
@@ -260,7 +260,7 @@ export default function CertificatesSection() {
 
       {/* Bottom Right: Circular Progress with Chromatic Aberration */}
       <div className="absolute right-8 md:right-24 bottom-12 md:bottom-24 z-20 flex items-center justify-center w-20 h-20 md:w-28 md:h-28">
-        <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90 drop-shadow-[0_0_10px_rgba(0,255,0,0.3)]">
+        <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90 drop-shadow-[0_0_10px_rgba(0,170,255,0.3)]">
           {/* Track ring */}
           <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.1)" strokeWidth="2" fill="none" />
           {/* Active progress arc */}

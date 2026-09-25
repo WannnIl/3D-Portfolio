@@ -8,40 +8,41 @@ interface NetworkLinesProps {
   nodes?: THREE.Vector3[];
 }
 
-// Internal node positions forming an organic network topology
-const defaultNodes = [
-  new THREE.Vector3(-5, -2, -1),
-  new THREE.Vector3(-4, 3, 0),
-  new THREE.Vector3(-3, 0, 2),
-  new THREE.Vector3(-2, -3, -2),
-  new THREE.Vector3(-1, 2, 1),
-  new THREE.Vector3(0, -1, -3),
-  new THREE.Vector3(1, 3, -1),
-  new THREE.Vector3(2, -2, 2),
-  new THREE.Vector3(3, 1, 0),
-  new THREE.Vector3(4, -3, -1),
-  new THREE.Vector3(5, 2, 1),
-  new THREE.Vector3(0, 0, 3),
-  new THREE.Vector3(-2, 4, -2),
-  new THREE.Vector3(3, 4, 2),
-  new THREE.Vector3(-4, -4, 2),
-];
+import { PROJECTS } from './projects';
 
-// About ~30 connections (pairs of node indices)
-const connections = [
-  [0, 2], [0, 3], [0, 14],
-  [1, 2], [1, 4], [1, 12],
-  [2, 4], [2, 5], [2, 11],
-  [3, 5], [3, 7], [3, 14],
-  [4, 6], [4, 11], [4, 12],
-  [5, 7], [5, 8], [5, 11],
-  [6, 8], [6, 10], [6, 13],
-  [7, 9], [7, 8], [7, 14],
-  [8, 10], [8, 9], [8, 13],
-  [9, 10], [9, 14],
-  [10, 13],
-  [11, 13], [11, 12]
-];
+// Generate nodes spanning the entire project length dynamically
+const generateNetwork = () => {
+  const nodeCount = Math.max(30, PROJECTS.length * 6);
+  const nodes: THREE.Vector3[] = [];
+  const minZ = 15;
+  const maxZ = -(PROJECTS.length * 10 + 20);
+
+  for (let i = 0; i < nodeCount; i++) {
+    const x = (Math.random() - 0.5) * 30; 
+    const y = -2 + Math.random() * 6;
+    const z = maxZ + Math.random() * (minZ - maxZ);
+    nodes.push(new THREE.Vector3(x, y, z));
+  }
+
+  const connections: [number, number][] = [];
+  // Connect each node to 2-3 of its closest neighbors
+  for (let i = 0; i < nodeCount; i++) {
+    const distances = [];
+    for (let j = 0; j < nodeCount; j++) {
+      if (i !== j) {
+        distances.push({ index: j, dist: nodes[i].distanceToSquared(nodes[j]) });
+      }
+    }
+    distances.sort((a, b) => a.dist - b.dist);
+    // Add 2 closest connections
+    connections.push([i, distances[0].index]);
+    connections.push([i, distances[1].index]);
+  }
+  
+  return { nodes, connections };
+};
+
+const { nodes: defaultNodes, connections } = generateNetwork();
 
 export default function NetworkLines({ nodes = defaultNodes }: NetworkLinesProps) {
   const linesRef = useRef<THREE.LineSegments>(null);
@@ -51,9 +52,9 @@ export default function NetworkLines({ nodes = defaultNodes }: NetworkLinesProps
     const colorsArray: number[] = [];
 
     const colorOptions = [
-      new THREE.Color("#062D18"), // Primary dark green
-      new THREE.Color("#073D20"), // Secondary mid green
-      new THREE.Color("#00A86B"), // Accent bright green
+      new THREE.Color("#041A33"), // Primary dark green
+      new THREE.Color("#062850"), // Secondary mid green
+      new THREE.Color("#007BFF"), // Accent bright green
     ];
 
     connections.forEach(([startIdx, endIdx]) => {

@@ -29,12 +29,12 @@ export default function CameraController() {
     const progress = s6State.progress;
     const elapsed = state.clock.elapsedTime;
 
-    // The camera starts far back at z=18, flies in to z=-15.
-    // So the total travel distance is 33 units over the scroll.
-    const targetZ = THREE.MathUtils.lerp(18, -15, progress);
+    // The camera starts far back at z=18, flies in to z=-75 to pass 10 books.
+    // Total travel distance is 93 units over the scroll.
+    const targetZ = THREE.MathUtils.lerp(18, -75, progress);
     
-    // We can add slight panning based on progress so it feels dynamic
-    const targetX = Math.sin(progress * Math.PI * 2) * 1.5;
+    // Keep panning minimal so we stay in the center aisle
+    const targetX = Math.sin(progress * Math.PI * 4) * 0.5;
     
     // Keep camera relatively low
     const baseRotX = -0.15; // slight downward look

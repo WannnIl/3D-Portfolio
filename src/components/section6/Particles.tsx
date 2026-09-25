@@ -45,7 +45,7 @@ export default function Particles() {
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, PARTICLE_COUNT]}>
       <sphereGeometry args={[1, 4, 4]} />
-      <meshBasicMaterial color="#073D20" transparent opacity={0.4} />
+      <meshBasicMaterial color="#062850" transparent opacity={0.4} />
     </instancedMesh>
   );
 }

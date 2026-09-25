@@ -4,38 +4,43 @@ import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const NODE_COUNT = 20;
+import { PROJECTS } from './projects';
 
 export default function CyberNodes() {
   const meshRef = useRef<THREE.InstancedMesh>(null);
-  
   const dummy = useMemo(() => new THREE.Object3D(), []);
+  
+  // Scale the number of nodes with the project count
+  const nodeCount = Math.max(20, PROJECTS.length * 4);
   
   const { positions, phases, colors } = useMemo(() => {
     const pos = [];
     const ph = [];
     const cols = [];
-    const colorNormal = new THREE.Color('#00A86B');
-    const colorActive = new THREE.Color('#39FF88');
+    const colorNormal = new THREE.Color('#007BFF');
+    const colorActive = new THREE.Color('#00CCFF');
     
-    for (let i = 0; i < NODE_COUNT; i++) {
+    // Spread z from +15 down to deep negative Z
+    const minZ = 15;
+    const maxZ = -(PROJECTS.length * 10 + 20);
+    
+    for (let i = 0; i < nodeCount; i++) {
       const x = (Math.random() - 0.5) * 30; // -15 to 15
-      const y = 0.5 + Math.random() * 1.5;  // 0.5 to 2
-      const z = (Math.random() - 0.5) * 20; // -10 to 10
+      const y = 0.5 + Math.random() * 2.5;  // 0.5 to 3
+      const z = maxZ + Math.random() * (minZ - maxZ);
       pos.push(new THREE.Vector3(x, y, z));
       
       ph.push(Math.random() * Math.PI * 2);
       
-      // Randomly make a few nodes active
       const isActive = Math.random() > 0.8;
       cols.push(isActive ? colorActive : colorNormal);
     }
     return { positions: pos, phases: ph, colors: cols };
-  }, []);
+  }, [nodeCount]);
 
   useEffect(() => {
     if (meshRef.current) {
-      for (let i = 0; i < NODE_COUNT; i++) {
+      for (let i = 0; i < nodeCount; i++) {
         dummy.position.copy(positions[i]);
         dummy.updateMatrix();
         meshRef.current.setMatrixAt(i, dummy.matrix);
@@ -52,7 +57,7 @@ export default function CyberNodes() {
     if (!meshRef.current) return;
     const time = state.clock.getElapsedTime();
     
-    for (let i = 0; i < NODE_COUNT; i++) {
+    for (let i = 0; i < nodeCount; i++) {
       dummy.position.copy(positions[i]);
       
       // Pulse scale oscillation
@@ -66,7 +71,7 @@ export default function CyberNodes() {
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, NODE_COUNT]}>
+    <instancedMesh ref={meshRef} args={[undefined, undefined, nodeCount]}>
       <sphereGeometry args={[0.08, 8, 8]} />
       <meshBasicMaterial toneMapped={false} />
     </instancedMesh>
