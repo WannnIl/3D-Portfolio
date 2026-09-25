@@ -1,61 +1,120 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
+import { useEffect, useRef } from "react";
+
+interface Particle {
+  x: number;
+  y: number;
+  life: number;
+}
 
 export default function CustomCursor() {
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const [isHovering, setIsHovering] = useState(false);
-
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
   useEffect(() => {
-    const cursor = cursorRef.current;
-    if (!cursor) return;
+    // Only run on desktop devices, smoke effects on mobile touch can be buggy/weird
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    // Move cursor with GSAP for smooth interpolation
-    const moveCursor = (e: MouseEvent) => {
-      gsap.to(cursor, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.2,
-        ease: "power2.out",
-      });
+    // Set canvas size to full screen
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
+    window.addEventListener("resize", resize);
+    resize();
 
-    // Detect hover on links or interactive elements
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName.toLowerCase() === "a" ||
-        target.tagName.toLowerCase() === "button" ||
-        target.closest("a") ||
-        target.closest("button") ||
-        target.classList.contains("interactive")
-      ) {
-        setIsHovering(true);
+    const particles: Particle[] = [];
+    let lastX = -1;
+    let lastY = -1;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (window.innerWidth < 768) return;
+      const x = e.clientX;
+      const y = e.clientY;
+      
+      if (lastX === -1 && lastY === -1) {
+        lastX = x;
+        lastY = y;
       }
+
+      // Interpolate to fill gaps if mouse moves fast
+      const dx = x - lastX;
+      const dy = y - lastY;
+      const dist = Math.hypot(dx, dy);
+      const steps = Math.max(1, Math.floor(dist / 4)); // Particle every 4px for extreme smoothness
+      
+      for (let i = 1; i <= steps; i++) {
+        const px = lastX + dx * (i / steps);
+        const py = lastY + dy * (i / steps);
+        particles.push({ x: px, y: py, life: 1.0 });
+      }
+      
+      lastX = x;
+      lastY = y;
     };
 
-    const handleMouseOut = () => {
-      setIsHovering(false);
+    window.addEventListener("mousemove", handleMouseMove);
+
+    let animationFrameId: number;
+    
+    const render = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Use screen blending mode for a glowing, overlapping effect
+      ctx.globalCompositeOperation = "screen";
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.life -= 0.015; // Controls how long the smoke lasts (lower = longer)
+        
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        // Size of the smoke particle. Grows slightly as it dissipates.
+        const baseRadius = 35;
+        const currentRadius = baseRadius + (1 - p.life) * 20;
+
+        // Radial gradient for soft glowing smoke
+        const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, currentRadius);
+        
+        // Deep blue core that fades into a darker blue outer edge
+        // Opacity is tied to life, so it fades out smoothly
+        const coreColor = `rgba(0, 100, 255, ${p.life * 0.4})`; // Vibrant blue core
+        const edgeColor = `rgba(0, 20, 100, ${p.life * 0.1})`; // Dark blue edge
+        const transparent = `rgba(0, 20, 100, 0)`;
+
+        gradient.addColorStop(0, coreColor);
+        gradient.addColorStop(0.4, edgeColor);
+        gradient.addColorStop(1, transparent);
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, currentRadius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      animationFrameId = requestAnimationFrame(render);
     };
 
-    window.addEventListener("mousemove", moveCursor);
-    document.addEventListener("mouseover", handleMouseOver);
-    document.addEventListener("mouseout", handleMouseOut);
+    render();
 
     return () => {
-      window.removeEventListener("mousemove", moveCursor);
-      document.removeEventListener("mouseover", handleMouseOver);
-      document.removeEventListener("mouseout", handleMouseOut);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", handleMouseMove);
+      cancelAnimationFrame(animationFrameId);
     };
   }, []);
 
   return (
-    <div
-      ref={cursorRef}
-      className={`fixed top-0 left-0 w-4 h-4 rounded-full pointer-events-none z-[9999] mix-blend-difference transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out ${
-        isHovering ? "scale-[3] bg-blue-500" : "scale-100 bg-white"
-      }`}
+    <canvas
+      ref={canvasRef}
+      className="fixed top-0 left-0 w-full h-full pointer-events-none z-[9999]"
     />
   );
 }

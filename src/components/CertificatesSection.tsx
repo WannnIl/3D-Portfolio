@@ -42,7 +42,6 @@ export default function CertificatesSection() {
       end: `+=${total * 150}%`,
       pin: true,
       scrub: 0,
-      refreshPriority: 1,
       onUpdate: (self) => {
         const progress = self.progress; 
         const perCert = 1 / total;
@@ -159,7 +158,7 @@ export default function CertificatesSection() {
   };
 
   return (
-    <section ref={sectionRef} className="relative z-40 w-full h-screen bg-[#020202] overflow-hidden flex items-center justify-center">
+    <section ref={sectionRef} className="relative z-40 w-full h-[100dvh] bg-[#020202] overflow-hidden flex items-center justify-center">
       
       {/* 3D Wireframe Cyber Tunnel Background (Optimized for Performance) */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none bg-black flex items-center justify-center [perspective:800px]">
@@ -220,7 +219,7 @@ export default function CertificatesSection() {
           <h2
             key={i}
             id={`cert-title-${i}`}
-            className="absolute top-0 left-0 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 text-4xl md:text-7xl font-primary font-bold uppercase tracking-widest w-full"
+            className="absolute top-0 left-0 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 text-2xl sm:text-3xl md:text-7xl font-primary font-bold uppercase tracking-widest w-full"
             style={{ opacity: i === 0 ? 1 : 0 }}
           >
             {cert.title}

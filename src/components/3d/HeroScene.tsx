@@ -14,7 +14,6 @@ export default function HeroScene() {
   const textBehindRef = useRef<THREE.Mesh>(null);
   const textFrontRef = useRef<THREE.Mesh>(null);
   const portraitRef = useRef<THREE.Group>(null);
-  const tribalRef = useRef<THREE.Mesh>(null);
 
   const positionX = useRef(0); // For continuous marquee
   const rawScrollVelocity = useRef(0); // Raw instantaneous velocity
@@ -99,13 +98,22 @@ export default function HeroScene() {
     }
   });
 
+  const isMobile = viewport.width < 5;
+  
+  // Responsive sizes
+  const bgTextSize = isMobile ? viewport.width / 4 : viewport.width / 8;
+  const fgTextSize = isMobile ? viewport.width / 5 : viewport.width / 8;
+  const imgScaleX = isMobile ? viewport.width * 0.75 : viewport.width / 3;
+  const imgScaleY = isMobile ? viewport.height * 0.5 : viewport.height / 1.5;
+  const fgTextY = isMobile ? -viewport.height / 3.5 : -viewport.height / 4;
+
   return (
     <group ref={groupRef} position={[0, 0.2, 0]}>
       {/* BACKGROUND TEXT */}
       <Text
         ref={textBehindRef}
         position={[0, 0, -2]}
-        fontSize={viewport.width / 8}
+        fontSize={bgTextSize}
         color="#ffffff"
         anchorX="right" // Anchor right so it extends endlessly to the left
         anchorY="middle"
@@ -120,28 +128,16 @@ export default function HeroScene() {
       <group ref={portraitRef} position={[0, 0, 0]}>
         <Image
           url="/profile.png"
-          scale={[viewport.width / 3, viewport.height / 1.5]}
+          scale={[imgScaleX, imgScaleY]}
           transparent
         />
       </group>
 
-      {/* TRIBAL GRAPHIC OVERLAY */}
-      <Text
-        ref={tribalRef}
-        position={[0, 0.5, 0.5]}
-        fontSize={viewport.width / 15}
-        color="#00aaff"
-        anchorX="center"
-        anchorY="middle"
-      >
-        {`><`}
-      </Text>
-
       {/* FOREGROUND TEXT */}
       <Text
         ref={textFrontRef}
-        position={[0, -viewport.height / 4, 1.5]}
-        fontSize={viewport.width / 8}
+        position={[0, fgTextY, 1.5]}
+        fontSize={fgTextSize}
         color="#ffffff"
         anchorX="center"
         anchorY="middle"

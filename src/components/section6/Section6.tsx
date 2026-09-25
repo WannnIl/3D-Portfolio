@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useRef, useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import Scene from "./Scene";
 import Section6Overlay from "./Section6Overlay";
@@ -17,6 +17,22 @@ gsap.registerPlugin(ScrollTrigger);
  * A full-screen immersive 3D environment representing cybersecurity infrastructure.
  * Composes a React Three Fiber canvas with an HTML overlay.
  */
+import { useThree } from '@react-three/fiber';
+
+function ResponsiveCamera() {
+  const { camera, size } = useThree();
+  useEffect(() => {
+    const isMobile = size.width < 768;
+    const fov = isMobile ? 80 : 50;
+    const pCam = camera as any;
+    if (pCam.fov !== fov) {
+      pCam.fov = fov;
+      pCam.updateProjectionMatrix();
+    }
+  }, [camera, size]);
+  return null;
+}
+
 export default function Section6() {
   const containerRef = useRef<HTMLElement>(null);
   const [progress, setProgress] = useState(0);
@@ -30,15 +46,14 @@ export default function Section6() {
         end: "+=12000", // Increased scroll distance to accommodate 10 books
         pin: true,
         scrub: 1,
-        refreshPriority: 2,
         onUpdate: (self) => {
-          // Compress the 3D animation into the first 85% of the scroll.
-          // The remaining 15% (after mappedProgress hits 1.0) creates a pause 
-          // where the doors stay fully closed before scrolling to the next section.
-          const mappedProgress = Math.min(1, self.progress / 0.85);
+          // Compress the 3D animation into the middle 80% of the scroll.
+          // The first 10% creates a pause (doors closed) when entering from the top.
+          // The last 10% creates a pause (doors closed) before exiting at the bottom.
+          let mappedProgress = (self.progress - 0.1) / 0.8;
+          mappedProgress = Math.max(0, Math.min(1, mappedProgress));
           
           s6State.progress = mappedProgress;
-          setProgress(mappedProgress);
 
           // Calculate chapter (1 to PROJECTS.length)
           let newChapter = 0;
@@ -55,7 +70,6 @@ export default function Section6() {
           }
 
           s6State.chapter = newChapter;
-          setChapter(newChapter);
         },
       });
     },
@@ -65,7 +79,7 @@ export default function Section6() {
   return (
     <section
       ref={containerRef}
-      className="relative w-full overflow-hidden h-screen z-50"
+      className="relative w-full overflow-hidden h-[100dvh] z-50"
       style={{
         background: `
           radial-gradient(circle at 50% 45%, rgba(0, 123, 255, 0.07), transparent 55%),
@@ -84,6 +98,7 @@ export default function Section6() {
           gl={{ antialias: true, alpha: false }}
           style={{ background: "#020406" }}
         >
+            <ResponsiveCamera />
           <Suspense fallback={null}>
             <Scene />
           </Suspense>
@@ -91,7 +106,7 @@ export default function Section6() {
       </div>
 
       {/* HTML Overlay — typography, HUD, navigation */}
-      <Section6Overlay progress={progress} chapter={chapter} />
+      <Section6Overlay />
     </section>
   );
 }

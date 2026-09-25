@@ -34,11 +34,12 @@ export default function CameraController() {
     const targetZ = THREE.MathUtils.lerp(18, -75, progress);
     
     // Keep panning minimal so we stay in the center aisle
-    const targetX = Math.sin(progress * Math.PI * 4) * 0.5;
+    const targetX = 0;
     
     // Keep camera relatively low
     const baseRotX = -0.15; // slight downward look
-    const baseRotY = Math.sin(progress * Math.PI) * 0.1; // slow pan side to side
+    const isMobile = window.innerWidth < 768;
+    const baseRotY = 0;
 
     // Slow cinematic drift
     const driftX = Math.sin(elapsed * 0.1) * 0.3;

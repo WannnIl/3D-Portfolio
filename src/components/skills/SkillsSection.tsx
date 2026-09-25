@@ -1,9 +1,14 @@
 "use client";
 
-import React, { useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import React, { useRef, useMemo, useState, useEffect } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Text, OrbitControls, Float, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const SKILLS = [
   { text: "LINUX", weight: 1.2 },
@@ -68,7 +73,10 @@ function InnerCore() {
   );
 }
 
-function WordCloud({ radius = 4.5 }) {
+function WordCloud() {
+  const { viewport } = useThree();
+  const isMobile = viewport.width < 5;
+  const radius = isMobile ? 2.2 : 3.8;
   // Create spherical distribution using Fibonacci sphere
   const words = useMemo(() => {
     const temp = [];
@@ -129,7 +137,7 @@ function WordCloud({ radius = 4.5 }) {
     <group ref={groupRef}>
       {/* Network Lines */}
       <lineSegments geometry={linesGeo}>
-        <lineBasicMaterial color="#007BFF" transparent opacity={0.1} />
+        <lineBasicMaterial color="#00CCFF" transparent opacity={0.35} />
       </lineSegments>
       
       {/* Central Core */}
@@ -144,28 +152,56 @@ function WordCloud({ radius = 4.5 }) {
 }
 
 function SkillNode({ position, word, weight }: { position: THREE.Vector3, word: string, weight: number }) {
+  const { viewport } = useThree();
+  const isMobile = viewport.width < 5;
+  const baseFontSize = isMobile ? 0.2 : 0.25;
   const innerRef = useRef<THREE.Group>(null);
+  const textRef = useRef<any>(null);
   
+  const isCore = weight >= 1.5;
+  const opacity = isCore ? 1 : 0.7;
+
+  // Pre-instantiate colors for performance
+  const cWhite = useMemo(() => new THREE.Color("#E8F4FF"), []);
+  const cCyan = useMemo(() => new THREE.Color("#00CCFF"), []);
+  const animatedColor = useMemo(() => new THREE.Color(), []);
+
   useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
     if (innerRef.current) {
       // Subtle pulse based on position hash
-      const t = clock.getElapsedTime();
       const scale = 1 + Math.sin(t * 3 + position.x * 10) * 0.05;
       innerRef.current.scale.set(scale, scale, scale);
     }
-  });
 
-  const isCore = weight >= 1.5;
-  const color = isCore ? "#E8F4FF" : "#00CCFF";
-  const opacity = isCore ? 1 : 0.7;
+    if (textRef.current) {
+      // Slower cycle (t * 0.5 instead of 1.5)
+      const cycle = Math.sin(t * 0.5 + position.y * 5);
+      
+      // Expand the sine wave to go beyond -1 and 1, then clamp it.
+      // This creates a "pause" at the extremes (0 and 1) before transitioning again.
+      const expanded = cycle * 1.5;
+      const blend = THREE.MathUtils.clamp((expanded + 1) / 2, 0, 1);
+      
+      const primaryColor = isCore ? cWhite : cCyan;
+      const secondaryColor = isCore ? cCyan : cWhite;
+
+      // Lerp the local color object
+      animatedColor.lerpColors(primaryColor, secondaryColor, blend);
+      
+      // Assign to the Troika text mesh's color property using a hex string
+      // This triggers Troika's internal uniform updates automatically
+      textRef.current.color = '#' + animatedColor.getHexString();
+    }
+  });
 
   return (
     <group position={position}>
       <Billboard follow={true} lockX={false} lockY={false} lockZ={false}>
         <group ref={innerRef}>
           <Text
-            fontSize={0.25 * weight}
-            color={color}
+            ref={textRef}
+            fontSize={baseFontSize * weight}
             anchorX="center"
             anchorY="middle"
             fillOpacity={opacity}
@@ -189,9 +225,41 @@ function SkillNode({ position, word, weight }: { position: THREE.Vector3, word: 
   );
 }
 
-export default function SkillsSection() {
+function SkillCanvas() {
   return (
-    <section className="relative w-full h-screen bg-[#020406] overflow-hidden flex items-center justify-center border-b border-[#007BFF]/20">
+    <Canvas camera={{ position: [0, 0, 12.5], fov: 45 }}>
+      <fog attach="fog" args={['#020406', 5, 18]} />
+      <ambientLight intensity={0.5} />
+      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+        <WordCloud />
+      </Float>
+      <OrbitControls 
+        enableZoom={false} 
+        enablePan={false}
+        autoRotate 
+        autoRotateSpeed={0.8} 
+        dampingFactor={0.05}
+      />
+    </Canvas>
+  );
+}
+
+export default function SkillsSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top top",
+      end: "+=1500", // Creates a scroll pause for 1500px
+      pin: true,
+    });
+  }, { scope: containerRef });
+
+  return (
+    <div ref={containerRef}>
+      <section ref={sectionRef} className="relative w-full h-[100dvh] bg-[#020406] overflow-hidden flex items-center justify-center border-b border-[#007BFF]/20">
       
       {/* Cinematic Background Gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#000000_80%)] pointer-events-none z-0" />
@@ -232,21 +300,9 @@ export default function SkillsSection() {
       </div>
 
       <div className="absolute inset-0 z-0 cursor-move">
-        <Canvas camera={{ position: [0, 0, 11], fov: 45 }}>
-          <fog attach="fog" args={['#020406', 5, 18]} />
-          <ambientLight intensity={0.5} />
-          <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-            <WordCloud radius={4.2} />
-          </Float>
-          <OrbitControls 
-            enableZoom={false} 
-            enablePan={false}
-            autoRotate 
-            autoRotateSpeed={0.8} 
-            dampingFactor={0.05}
-          />
-        </Canvas>
+        <SkillCanvas />
       </div>
     </section>
+    </div>
   );
 }

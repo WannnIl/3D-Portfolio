@@ -3,20 +3,28 @@
 import { useState, useEffect, useRef } from "react";
 import { PROJECTS } from "./projects";
 
-interface Section6OverlayProps {
-  progress: number;
-  chapter: number;
-}
+
 
 /**
  * Section 6 HTML overlay — editorial typography, HUD elements,
  * terminal animation, and navigation labels.
  * Rendered on top of the 3D canvas.
  */
-export default function Section6Overlay({
-  progress,
-  chapter,
-}: Section6OverlayProps) {
+import { s6State } from './store';
+export default function Section6Overlay() {
+  const [progress, setProgress] = useState(s6State.progress);
+  const [chapter, setChapter] = useState(s6State.chapter);
+
+  useEffect(() => {
+    let frameId: number;
+    const loop = () => {
+      setProgress(s6State.progress);
+      setChapter(s6State.chapter);
+      frameId = requestAnimationFrame(loop);
+    };
+    loop();
+    return () => cancelAnimationFrame(frameId);
+  }, []);
   const [terminalLines, setTerminalLines] = useState<string[]>([]);
   const terminalRef = useRef<HTMLDivElement>(null);
 

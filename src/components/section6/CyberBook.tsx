@@ -14,6 +14,8 @@ interface CyberBookProps {
   theme: string;
 }
 
+import { useThree } from '@react-three/fiber';
+
 export default function CyberBook({
   index,
   title,
@@ -23,6 +25,9 @@ export default function CyberBook({
   theme,
 }: CyberBookProps) {
   const groupRef = useRef<THREE.Group>(null);
+    const { size } = useThree();
+    const isMobile = size.width < 768;
+    const bookScale = isMobile ? 0.35 : 0.75;
   
   const themeColor = theme === 'Network' ? '#007BFF' : 
                      theme === 'Threat' ? '#00CCFF' : 
@@ -39,7 +44,7 @@ export default function CyberBook({
     // Book 3: z = -16, x = 1.5
     
     const baseZ = 8 - index * 8;
-    const baseX = index % 2 === 0 ? -1.5 : 1.5;
+    const baseX = isMobile ? (index % 2 === 0 ? -0.7 : 0.7) : (index % 2 === 0 ? -1.4 : 1.4);
     
     // Add subtle floating animation
     const floatY = Math.sin(t * 2 + index) * 0.15;
@@ -54,11 +59,11 @@ export default function CyberBook({
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} scale={[bookScale, bookScale, bookScale]}>
       {/* Cover */}
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[3, 4, 0.1]} />
-        <meshStandardMaterial color="#03060A" roughness={0.7} metalness={0.2} />
+        <meshStandardMaterial color="#03060A" roughness={0.7} metalness={0.2} transparent={true} opacity={0.95} side={THREE.DoubleSide} />
         <Edges scale={1} threshold={15}>
           <lineBasicMaterial color={themeColor} />
         </Edges>
@@ -67,7 +72,7 @@ export default function CyberBook({
       {/* Pages block */}
       <mesh position={[0, 0, -0.25]}>
         <boxGeometry args={[2.8, 3.8, 0.4]} />
-        <meshStandardMaterial color="#050A15" roughness={0.9} metalness={0.1} />
+        <meshStandardMaterial color="#050A15" roughness={0.9} metalness={0.1} transparent={true} opacity={0.95} side={THREE.DoubleSide} />
       </mesh>
 
       {/* Text on Cover */}

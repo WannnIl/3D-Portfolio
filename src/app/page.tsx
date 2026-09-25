@@ -12,6 +12,7 @@ import Section6 from "@/components/section6/Section6";
 
 gsap.registerPlugin(ScrollTrigger);
 
+
 import SkillsSection from "@/components/skills/SkillsSection";
 
 export default function Home() {
@@ -51,6 +52,7 @@ export default function Home() {
   ];
 
   useGSAP(() => {
+    ScrollTrigger.config({ ignoreMobileResize: true });
     
     
     // --- SECTION 1 CANVAS HIDE ---
@@ -154,7 +156,6 @@ export default function Home() {
           end: "+=600%", // Give it plenty of scroll distance to play out
           pin: true,
           scrub: 1,
-          refreshPriority: 3,
           onUpdate: (self) => {
             // Sequence Image logic (Update src based on scroll progress 0 to 0.7)
             if (self.progress < 0.7 && cursorImgRef.current) {
@@ -231,6 +232,7 @@ export default function Home() {
 
   // Ensure GSAP recalculates all trigger positions after all sections have mounted their own ScrollTriggers
   useGSAP(() => {
+    ScrollTrigger.config({ ignoreMobileResize: true });
     const timeout = setTimeout(() => {
       ScrollTrigger.sort();
       ScrollTrigger.refresh();
